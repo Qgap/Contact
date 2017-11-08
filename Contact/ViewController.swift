@@ -44,19 +44,22 @@ class ViewController: UIViewController,CNContactPickerDelegate {
         let firstName = contact.givenName
         print("\(lastName)\(firstName)")
         
+        var value = ""
         for phone in contact.phoneNumbers {
             var label = ""
             if phone.label != nil {
                 label = CNLabeledValue<NSString>.localizedString(forLabel: phone.label!)
             }
             
-            let value = phone.value.stringValue
+            value = phone.value.stringValue
             print("\(label) \(value)")
-            
-            let alert = UIAlertController.init(title: lastName, message: value, preferredStyle: UIAlertControllerStyle.alert)
-            self.navigationController?.pushViewController(alert, animated: true)
-            
         }
+        
+        
+        let alert = UIAlertController.init(title: lastName, message: value, preferredStyle: UIAlertControllerStyle.alert)
+        self.present(alert, animated: true, completion: {
+            print("finished")
+        })
     }
     
     func loadContactsData() {
@@ -98,8 +101,6 @@ class ViewController: UIViewController,CNContactPickerDelegate {
         } catch  {
             print("error")
         }
-        
-        
     }
     
     override func didReceiveMemoryWarning() {
