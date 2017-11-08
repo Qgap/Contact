@@ -12,6 +12,9 @@ import ContactsUI
 
 class ViewController: UIViewController,CNContactPickerDelegate {
 
+    var nameField:UITextField!
+    var phoneField:UITextField!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -22,14 +25,25 @@ class ViewController: UIViewController,CNContactPickerDelegate {
         contactsButton.addTarget(self, action: #selector(getContacts), for: UIControlEvents.touchUpInside)
         self.view.addSubview(contactsButton)
         
+        let viewWidth = self.view.frame.size.width
+        
+        self.nameField = UITextField.init(frame: CGRect.init(x: 0, y: 150, width: viewWidth, height: 30))
+        self.nameField.textAlignment = NSTextAlignment.center
+        self.view.addSubview(self.nameField)
+        
+        self.phoneField = UITextField.init(frame: CGRect.init(x: 0, y: 200, width: viewWidth, height: 30))
+        self.phoneField.textAlignment = NSTextAlignment.center
+        self.view.addSubview(self.phoneField)
     }
+
+    // MARK: Button action
     
     @objc func getContacts() -> Void {
         
         CNContactStore().requestAccess(for: .contacts) { (isRight, error) in
             if (isRight) {
-                print("success")
-                self.loadContactsData()
+            
+//                self.loadContactsData()
                 
                 let contactPicker = CNContactPickerViewController.init()
                 contactPicker.delegate = self
@@ -38,7 +52,23 @@ class ViewController: UIViewController,CNContactPickerDelegate {
         }
     }
     
-    func contactPicker(_ picker: CNContactPickerViewController, didSelect contact: CNContact) {
+    // MARK: Delegate
+    
+    // Singular delegate methods.
+    // contact detail
+    func contactPicker(_ picker: CNContactPickerViewController, didSelect contactProperty: CNContactProperty) {
+        let detail = contactProperty.contact
+        self.contactMessage(contact: detail)
+    }
+    
+    // select
+//    func contactPicker(_ picker: CNContactPickerViewController, didSelect contact: CNContact) {
+//        self.contactMessage(contact: contact)
+//    }
+    
+    //MARK: Pravite Method
+    
+    func contactMessage(contact:CNContact) {
         
         let lastName = contact.familyName
         let firstName = contact.givenName
@@ -51,17 +81,18 @@ class ViewController: UIViewController,CNContactPickerDelegate {
                 label = CNLabeledValue<NSString>.localizedString(forLabel: phone.label!)
             }
             
-            value = phone.value.stringValue
+            let stringValue = phone.value.stringValue
+            value = stringValue.replacingOccurrences(of: "-", with: "")
+            value = value.trimmingCharacters(in: .whitespacesAndNewlines)
             print("\(label) \(value)")
         }
         
-        
-        let alert = UIAlertController.init(title: lastName, message: value, preferredStyle: UIAlertControllerStyle.alert)
-        self.present(alert, animated: true, completion: {
-            print("finished")
-        })
+        self.nameField.text = lastName + firstName
+        self.phoneField.text = value
     }
     
+    
+    // get phone contact
     func loadContactsData() {
         
         let status = CNContactStore.authorizationStatus(for: .contacts)
